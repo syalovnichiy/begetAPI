@@ -1,38 +1,22 @@
 import requests
+import urllib
 import json
-
-
-def begetRequest(section, method, login, password):
-	return 'https://api.beget.com/api/' + section + '/' + method + '?login=' + login + '&passwd=' + password + '&output_format=json'
 
 class BegetAPI:
 
 	def __init__(self, login, password):
-		request = begetRequest('user', 'getAccountInfo', login, password)
-		print request
-		response = requests.get(request)
-		#print response.content
-		user = json.loads(response.content)	
-		if user['status'] == 'error':
-			raise Exception(user['error_text'])
+		self.login = login
+		self.password = password
+
+
+	def begetRequest(self, method, **args):
+		request = 'https://api.beget.com/api/{}/{}?login={}&passwd={}&output_format=json&input_format=json&input_data={}'.format(method.split('_')[0], method.split('_')[1], self.login, self.password, urllib.quote(json.dumps(args)))
+		response = json.loads(requests.get(request).content)
+		if response['status'] == 'error':
+			raise Exception('{} : {}'.format(response['error_code'], response['error_text']))
 		else:
-			self.login = login
-			self.password = password
+			print response['answer']
+	
 
-
-	def getAccountInfo(self):
-		response = requests.get(begetRequest('user', 'getAccountInfo', self.login, self.password))
-		return json.loads(response.content)
-
-
-	def toggleSsh(self, status, **kwargs):
-		request = requests.get(begetRequest('user', 'getAccountInfo', self.login, self.password) + '&status=' + status)
-		if 'ftplogin' in kwargs.keys():
-			response = requests.get(request + '&ftplogin=' + kwargs['ftplogin'])
-		else:
-			response = requests.get(request)
-
-		return json.loads(response.content)
-
-
-
+	def __getattr__(self, method):
+		return lambda **args: self.begetRequest(method, **args)
