@@ -1,2 +1,2 @@
 # begetAPI
-python lib for BegetAPI
+python module for BegetAPI
