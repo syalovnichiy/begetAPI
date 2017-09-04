@@ -4,14 +4,32 @@ import json
 
 
 
-class BegetAPIMethod(object):
-	"""docstring for BegetAPIMethod"""
+class BegetAPIRequest(object):
+	
+	"""
+	accesssory class for BegetAPI
+	this class use for catch the method of called partition
+	and make request
+	"""
+
+
 	def __init__(self, api, partition):
+
+		"""
+		init by called in BegetAPI partition and user's instance
+		"""
+
 		self.partition = partition
 		self.api_instans = api
 
+
 	def begetRequest(self, method, **args):
-		#request = 'https://api.beget.com/api/{}/{}?login={}&passwd={}&output_format=json&input_format=json&input_data={}'.format(method.split('_')[0], method.split('_')[1], self.login, self.password, urllib.quote(json.dumps(args)))
+		
+		"""
+		this method create url and make request
+		return beget API errors or return boty of response
+		"""
+
 		request = (
 			'https://api.beget.com/api'
 			'/{}/{}?login={}&passwd={}&'
@@ -22,29 +40,47 @@ class BegetAPIMethod(object):
 			method,
 			self.api_instans.login,
 			self.api_instans.password, 
-			json.dumps(args)
+			urllib.quote(json.dumps(args))
 		)
 
-		#response = json.loads(requests.get(request).content)
-		#if response['status'] == 'error':
-		#	raise Exception('{} : {}'.format(response['error_code'], response['error_text']))
-		#else:
-		#	print response['answer']
-		return request
+		response = json.loads(requests.post(request).content)
+		if response['status'] == 'error':
+			raise Exception('{} : {}'.format(response['errors']['error_code'], response['errors']['error_text']))
+		elif response['answer']['status'] == 'error':
+			answer = response['answer']['errors'][0]
+			print answer['error_code'],' : ', answer['error_text']
+		else:
+			return response['answer']
 
 
 	def __getattr__(self, method):
 		return lambda **args: self.begetRequest(method, **args)
 
+
+
 class BegetAPI:
+	
+	"""
+	The main class 
+	create beget's user instance
+	use for call beget api methond for current user's account
+	"""
+
 
 	def __init__(self, login, password):
+
+		"""
+		init user by login and password
+		"""
+
 		self.login = login
 		self.password = password	
 
 
 	def __getattr__(self, atribute):
-		return BegetAPIMethod(self, atribute)
 
-a = BegetAPI('test','test')
-a.razdel.method(a=1, b=2)
+		"""
+		catch called partition of begetAPI
+		"""
+
+		return BegetAPIRequest(self, atribute)
