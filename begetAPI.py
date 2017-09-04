@@ -45,7 +45,7 @@ class BegetAPIRequest(object):
 
 		response = json.loads(requests.post(request).content)
 		if response['status'] == 'error':
-			print response['error_code'], ':', response['error_text']
+			print response['error_code'], ':', response['error_text']cp
 		elif response['answer']['status'] == 'error':
 			answer = response['answer']['errors'][0]
 			print answer['error_code'],' : ', answer['error_text']
