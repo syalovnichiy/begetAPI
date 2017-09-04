@@ -45,7 +45,7 @@ class BegetAPIRequest(object):
 
 		response = json.loads(requests.post(request).content)
 		if response['status'] == 'error':
-			raise Exception('{} : {}'.format(response['errors']['error_code'], response['errors']['error_text']))
+			raise Exception('{} : {}'.format(response['error_code'], response['error_text']))
 		elif response['answer']['status'] == 'error':
 			answer = response['answer']['errors'][0]
 			print answer['error_code'],' : ', answer['error_text']
